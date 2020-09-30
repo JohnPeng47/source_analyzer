@@ -1,0 +1,89 @@
+   Compiling source_analyzer v0.1.0 (/home/ec2-user/source_analyzer)
+warning: unused import: `std::collections::HashMap`
+ --> src/source_file.rs:2:5
+  |
+2 | use std::collections::HashMap;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `std::env`
+ --> src/source_file.rs:4:5
+  |
+4 | use std::env;
+  |     ^^^^^^^^
+
+warning: unused import: `Path`
+ --> src/source_file.rs:5:17
+  |
+5 | use std::path::{Path, PathBuf};
+  |                 ^^^^
+
+warning: unused imports: `DirEntry`, `self`
+ --> src/source_file.rs:6:15
+  |
+6 | use std::fs::{self, DirEntry, File};
+  |               ^^^^  ^^^^^^^^
+
+warning: unused imports: `BufRead`, `BufReader`
+ --> src/main.rs:4:15
+  |
+4 | use std::io::{BufReader, BufRead}; //BufRead implements the lines trait
+  |               ^^^^^^^^^  ^^^^^^^
+
+warning: unused import: `PathBuf`
+ --> src/main.rs:6:23
+  |
+6 | use std::path::{Path, PathBuf};
+  |                       ^^^^^^^
+
+warning: unused import: `std::collections::HashMap`
+ --> src/main.rs:8:5
+  |
+8 | use std::collections::HashMap;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `FuncSignature`
+  --> src/main.rs:10:44
+   |
+10 | use source_file::{SourceFiles, SourceFile, FuncSignature};
+   |                                            ^^^^^^^^^^^^^
+
+error[E0624]: associated function `new` is private
+  --> src/main.rs:21:34
+   |
+21 |     let mut files = SourceFiles::new();
+   |                                  ^^^ private associated function
+
+error[E0616]: field `files` of struct `SourceFiles` is private
+  --> src/main.rs:27:30
+   |
+27 |     for source in &mut files.files {
+   |                              ^^^^^ private field
+
+error[E0599]: no method named `parse_source` found for mutable reference `&mut SourceFile` in the current scope
+  --> src/main.rs:28:16
+   |
+28 |         source.parse_source();
+   |                ^^^^^^^^^^^^ method not found in `&mut SourceFile`
+   |
+   = help: items from traits can only be used if the trait is implemented and in scope
+note: `ParseSource` defines an item `parse_source`, perhaps you need to implement it
+  --> src/source_file.rs:34:1
+   |
+34 | trait ParseSource {
+   | ^^^^^^^^^^^^^^^^^
+
+error[E0616]: field `files` of struct `SourceFiles` is private
+  --> src/main.rs:45:15
+   |
+45 |         files.files.push(source_file);
+   |               ^^^^^ private field
+
+error: aborting due to 4 previous errors; 8 warnings emitted
+
+Some errors have detailed explanations: E0599, E0616, E0624.
+For more information about an error, try `rustc --explain E0599`.
+error: could not compile `source_analyzer`
+
+To learn more, run the command again with --verbose.

@@ -1,84 +1,16 @@
+pub mod source_file;
+
 use std::io;
 use std::io::{BufReader, BufRead}; //BufRead implements the lines trait
 use std::env;
 use std::path::{Path, PathBuf};
 use std::fs::{self, DirEntry, File};
+use std::collections::HashMap;
 use regex::Regex;
 
+use source_file::{SourceFiles, SourceFile, FuncSignature};
+
 const function_pats: &'static [&'static str] = &[r"(public|private).+{$"];
-
-struct SourceFiles {
-    files: Vec<SourceFile>,
-}
-
-impl SourceFiles {
-    fn new() -> SourceFiles {
-        SourceFiles {
-            files: Vec::new()
-        }
-    }
-}
-
-struct SourceFile {
-    func_list: Vec<FuncSignature>,
-    file_path: PathBuf,
-}
-
-struct FuncSignature {
-    name: String,
-}
-
-
-trait ParseSource {
-    // str is a reference to a statically allocated str? Or does it work with String too?
-    // LifeTime
-    // the lifetime parameters say that the output variable's scope is tied to the scope of line
-    // this assertion is checked by the Rust compiler during compile to make sure no dangling
-    // pointers are being used
-    fn find_func<'a>(line: &'a str, pat: &str) -> Option<&'a str>;
-
-    // Is it better to use &mut self here or self and return Self?
-    fn parse_source(&mut self) -> ();
-}
-
-impl ParseSource for SourceFile {
-    fn find_func<'a>(line:&'a str, pat:&str) -> Option<&'a str> {
-        let pattern = Regex::new(pat).unwrap();
-        // is there no better way to handle this?
-        // Get someone's opinion on this
-        let arg = pattern.captures(line);
-        match arg {
-            None => None,
-            Some(x) => {
-                let matched_arg = x.get(1)
-                    .expect("Error getting first matching group")
-                    .as_str();
-                return Some(matched_arg)
-            }
-        }
-    }
-    // parse functions name and args
-    // parse parents class structure
-    fn parse_source(&mut self) -> () {
-        //TODO: change this to use ? and modify function signature to return error
-        let input = File::open(&self.file_path).unwrap();
-        let buffered = io::BufReader::new(input);
-        println!("filepath: {}", self.file_path.to_str().unwrap());
-        
-        // Parse loop
-        for line in buffered.lines() {
-            let line = line.unwrap();
-            if line.contains("class") {
-                println!("CLASS DETECTED: {}", line);
-            }
-            // get function names and arguments
-            if line.contains("public") || line.contains("private") {
-                println!("{}", line);
-            }
-
-        } 
-    }
-}
 
 fn main() {
     // get path from stdin
@@ -96,10 +28,6 @@ fn main() {
     for source in &mut files.files {
         source.parse_source();
     }
-}
-
-fn test(s: SourceFile) {
-    ()
 }
 
 fn path_cb(entry: &DirEntry, mut files: &mut SourceFiles) -> () {
