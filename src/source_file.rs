@@ -72,71 +72,64 @@ impl SourceFile {
                 }
                 _ => (),
             }
-            }
-            false
         }
+        false
+    }
 
-        // parse functions name and args
-        // parse parents class structure
-        pub fn parse_source(&mut self) -> () {
-            //TODO: change this to use ? and modify function signature to return error
-            let input = File::open(&self.file_path).unwrap();
-            let buffered = BufReader::new(input);
-            //println!("filepath: {}", self.file_path.to_str().unwrap());
+    // parse functions name and args
+    // parse parents class structure
+    pub fn parse_source(&mut self) -> () {
+        //TODO: change this to use ? and modify function signature to return error
+        let input = File::open(&self.file_path).unwrap();
+        let buffered = BufReader::new(input);
+        //println!("filepath: {}", self.file_path.to_str().unwrap());
 
-            //OPTIMIZATION: allocate storage so that we dont need to reinitialize them each time
-            //parse_source is called
-            // Current function or class scope
-            let class = String::from("");
-            let function = String::from("");
+        //OPTIMIZATION: allocate storage so that we dont need to reinitialize them each time
+        //parse_source is called
+        // Current function or class scope
+        let class = String::from("");
+        let function = String::from("");
 
-            // Use these to determine the scoping levels
-            // holds pairs of brackets
-            // OPTIMIZATION: implement a push/pop that will automatically update some parameter holding
-            // the current function scope
-            let mut function_scope = Vec::<char>::new();
-            let mut class_scope = Vec::<char>::new();
+        // Use these to determine the scoping levels
+        // holds pairs of brackets
+        // OPTIMIZATION: implement a push/pop that will automatically update some parameter holding
+        // the current function scope
+        let mut function_scope = Vec::<char>::new();
+        let mut class_scope = Vec::<char>::new();
 
-            // Holds the lines to the buffer
-            let function_buf = Vec::<&String>::new();
+        // Holds the lines to the buffer
+        let function_buf = Vec::<&String>::new();
 
-            // Parse loop
-            // Naive parsing implementation, we make assumptions:
-            // 1.Look for function definitions (function signature followed by "}")
-            // 2.Assume no inner function definitions
-            // 3.Look for function calls
-            for line in buffered.lines() {
-                let line = line.unwrap();
+        // Parse loop
+        // Naive parsing implementation, we make assumptions:
+        // 1.Look for function definitions (function signature followed by "}")
+        // 2.Assume no inner function definitions
+        // 3.Look for function calls
+        for line in buffered.lines() {
+            let line = line.unwrap();
 
-                // get function names and arguments
-                if line.contains("public") || line.contains("private") {
-                    if line.contains("class") {
-                        //println!("CLASS DETECTED: {}", line);
-                        println!("class: {}", line.split(" ").nth(2).unwrap_or("problem"));
-                    } else if line.contains("(") && line.contains(")") && line.trim_start().trim_end().
-                        let mut line_trimmed = line.split_whitespace();
-                    println!("        function name: {}", line);
+            // split_whitespace returns iterator over &str, need to convert to String
+            let mut line_trimmed: Vec<String> = line.split_whitespace().map(String::from).collect();
 
-                    let func_arg = line_trimmed.nth(1).unwrap();
-                    let func_name = line_trimmed.nth(2).unwrap();
+            if line_trimmed.contains(&String::from("public"))
+                || line_trimmed.contains(&String::from("private"))
+            {
+                if line.contains("class") {
+                    //println!("CLASS DETECTED: {}", line);
+                    println!("class: {}", line.split(" ").nth(2).unwrap_or("problem"));
 
-                    //println!("SPLIT ARGS: {} {}", func_arg, func_name);
-                    for l in line_trimmed {
-                        println!("{}", l);
+                // line contains a function
+                } else if line.contains("(") && line.contains(")") {
+                    println!("function name: {}", line);
+
+                    if line_trimmed.len() < 3 {
+                        continue;
                     }
-                }
-            }
-            // get function names and arguments
-            if line.contains("public") || line.contains("private") {}
 
-            // parse brackets contained in the line and update our scopes
-            let function_closed = SourceFile::parse_brackets(&line, &mut function_scope);
-            let class_closeed = SourceFile::parse_brackets(&line, &mut class_scope);
+                    let func_arg = line_trimmed.get(1).unwrap();
+                    let func_name = line_trimmed.get(2).unwrap();
 
-            // if function scope is closed we have finished parsing a function
-            if function_closed {
-                for line in &function_buf {
-                    println!("{}", line);
+                    println!("SPLIT ARGS: {} {}", func_arg, func_name);
                 }
             }
         }
